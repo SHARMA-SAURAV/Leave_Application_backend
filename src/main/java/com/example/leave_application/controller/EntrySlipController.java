@@ -17,18 +17,45 @@ public class EntrySlipController {
     @Autowired
     private EntrySlipRepository slipRepo;
 
-    @PostMapping("/apply")
-    public ResponseEntity<?> applyEntry(@RequestBody EntrySlip slip,
-                                        @RequestParam String targetLevel, // "FLA" or "SLA"
-                                        Authentication auth) {
-        slip.setEmail(auth.getName());
-        slip.setStatus("PENDING");
-        slip.setCurrentLevel(targetLevel.toUpperCase()); // "FLA" or "SLA"
-        slip.setAppliedAt(LocalDateTime.now());
-        slipRepo.save(slip);
+//    @PostMapping("/apply")
+//    public ResponseEntity<?> applyEntry(@RequestBody EntrySlip slip,
+//                                        @RequestParam String targetLevel, // "FLA" or "SLA"
+//                                        Authentication auth) {
+//        EntrySlip entrySlip =new EntrySlip();
+//        entrySlip.setInTime(slip.getInTime());
+////        slip.setInTime();
+//        slip.setStatus("PENDING");
+//        slip.setCurrentLevel(targetLevel.toUpperCase()); // "FLA" or "SLA"
+//        slip.setAppliedAt(LocalDateTime.now());
+//        slipRepo.save(slip);
+//
+//        return ResponseEntity.ok("Entry slip submitted to " + slip.getCurrentLevel());
+//    }
 
-        return ResponseEntity.ok("Entry slip submitted to " + slip.getCurrentLevel());
-    }
+
+
+
+
+@PostMapping("/apply")
+public ResponseEntity<?> applyEntry(
+        @RequestBody EntrySlip slip,
+        @RequestParam String targetLevel,         // "FLA" or "SLA"
+        @RequestParam String approverEmail,       // selected approver
+        Authentication auth) {
+
+    slip.setEmail(auth.getName());               // the applicant's email
+    slip.setStatus("PENDING");
+    slip.setCurrentLevel(targetLevel.toUpperCase());
+    slip.setApproverEmail(approverEmail);
+    slip.setAppliedAt(LocalDateTime.now());
+
+    // Make sure inTime and outTime are parsed correctly
+    // If `EntrySlip` uses LocalTime, and frontend sends "HH:mm", it will work
+
+    slipRepo.save(slip);
+
+    return ResponseEntity.ok("Entry slip submitted to " + targetLevel);
+}
 
 
     @GetMapping("/all")
