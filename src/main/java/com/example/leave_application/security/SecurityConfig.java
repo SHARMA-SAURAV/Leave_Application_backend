@@ -1,6 +1,7 @@
 package com.example.leave_application.security;
 
 
+import com.example.leave_application.model.RoleType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -65,7 +66,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/users").authenticated()
-
+                        .requestMatchers("/api/leave/fla/**").hasRole("FLA")
+                        .requestMatchers("/api/leave/sla/**").hasRole("SLA")
+                        .requestMatchers("/api/leave/hr/**").hasRole("HR")
 
                         .anyRequest().authenticated() // Secure all other endpoints
                 )
@@ -93,7 +96,7 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173","https://localhost:8080"));
+        configuration.setAllowedOrigins(List.of("http://localhost:5173","http://localhost:8080"));
         configuration.setAllowedMethods(List.of("*"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
