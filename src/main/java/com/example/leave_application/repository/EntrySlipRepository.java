@@ -6,5 +6,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface EntrySlipRepository extends JpaRepository<EntrySlip, Long> {
-    List<EntrySlip> findByEmail(String email);
+//    List<EntrySlip> findByEmail(String email);
+
+    List<EntrySlip> findByCreatedBy_Email(String email);
+
+//    List<EntrySlip> findByCurrentLevelAndEmail(String currentLevel, String approverEmail, String status);
+    List<EntrySlip> findByCurrentLevelAndApproverEmailAndStatus(String currentLevel, String approverEmail, String status);
+    List<EntrySlip> findByCurrentLevelAndStatus(String currentLevel, String status);
+
+
 }

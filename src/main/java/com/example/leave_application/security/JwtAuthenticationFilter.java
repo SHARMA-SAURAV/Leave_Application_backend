@@ -48,20 +48,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 
             if (jwt != null) {
-                System.err.println("JWT Found: " + jwt);
+//                System.err.println("JWT Found: " + jwt);
                 if (jwtUtils.validateToken(jwt)) {
                     String username = jwtUtils.extractEmail(jwt);
-                    System.err.println("Extracted user: " + username);
+//                    System.err.println("Extracted user: " + username);
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 } else {
-                    System.err.println("JWT is invalid!");
+//                    System.err.println("JWT is invalid!");
                 }
             } else {
-                System.err.println("JWT is null or not provided");
+//                System.err.println("JWT is null or not provided");
             }
         } catch (Exception e) {
             logger.error("Cannot set user authentication: {}", e);

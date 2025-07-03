@@ -9,6 +9,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+
+
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -18,9 +21,13 @@ public class EntrySlip {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String email;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "created_by_id")
+    private User createdBy;
+
     private String reason;
     private LocalDate date;
+
     @Column(columnDefinition = "TIME")
     private LocalTime inTime;
 
@@ -31,6 +38,17 @@ public class EntrySlip {
     private String currentLevel;
     private LocalDateTime appliedAt;
 
-    private String approverEmail; // either selected FLA or SLA
-//    private String currentLevel;  // "FLA" or "SLA"
+    private String approverEmail; // initial approver selected (FLA or SLA)
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "approved_by_fla_id")
+    private User approvedByFLA;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "approved_by_sla_id")
+    private User approvedBySLA;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "approved_by_hr_id")
+    private User approvedByHR;
 }

@@ -18,12 +18,22 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
+//    @GetMapping("/users")
+//    public ResponseEntity<List<User>> getUsersByRole(@RequestParam String role, Authentication auth) {
+//        System.out.println("Authenticated user: " + auth.getName());
+//        RoleType roleType = RoleType.valueOf(role.toUpperCase());
+//        List<User> users = userRepository.findByRole(roleType);
+//        return ResponseEntity.ok(users);
+//    }
+
+
     @GetMapping("/users")
     public ResponseEntity<List<User>> getUsersByRole(@RequestParam String role, Authentication auth) {
         System.out.println("Authenticated user: " + auth.getName());
         RoleType roleType = RoleType.valueOf(role.toUpperCase());
-        List<User> users = userRepository.findByRole(roleType);
+        List<User> users = userRepository.findByRolesContaining(roleType);
         return ResponseEntity.ok(users);
     }
+
 
 }
