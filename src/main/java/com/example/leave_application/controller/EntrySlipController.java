@@ -1,5 +1,4 @@
 package com.example.leave_application.controller;
-
 import com.example.leave_application.model.EntrySlip;
 import com.example.leave_application.model.User;
 import com.example.leave_application.repository.EntrySlipRepository;
@@ -8,11 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDateTime;
 import java.util.List;
-
-
 @RestController
 @RequestMapping("/api/entry-slip")
 public class EntrySlipController {
@@ -29,9 +25,7 @@ public ResponseEntity<?> applyEntry(
         @RequestParam String targetLevel,
         @RequestParam String approverEmail,
         Authentication auth) {
-
     User user = userRepository.findUserByEmail(auth.getName()).orElseThrow();
-
     slip.setCreatedBy(user);
     slip.setStatus(targetLevel.equalsIgnoreCase("FLA") ? "PENDING_FLA" : "PENDING_SLA");
     slip.setCurrentLevel(targetLevel.toUpperCase());
@@ -41,16 +35,10 @@ public ResponseEntity<?> applyEntry(
     slipRepo.save(slip);
     return ResponseEntity.ok("Entry slip submitted to " + targetLevel);
 }
-
-
-
-
-
     @GetMapping("/all")
     public List<EntrySlip> all() {
         return slipRepo.findAll();
     }
-
     //Get all entryslip who are pending for SLA
     @GetMapping("/pending/sla")
     public List<EntrySlip> pendingForSLA(Authentication auth) {
@@ -71,18 +59,9 @@ public ResponseEntity<?> applyEntry(
     }
     @GetMapping("/pending/hr")
         public List<EntrySlip> pendingForHR(Authentication auth) {
-//            String email = auth.getName();
-
-//            System.err.println("Email of the user: " + email);
-            System.err.println("asdjfheue heuiheuheuehueheuheuheuheuhuehueehueh: " );
-
             List<EntrySlip> pendingIndent= slipRepo.findByCurrentLevelAndStatus("HR", "PENDING_HR" );
             return ResponseEntity.ok(pendingIndent).getBody();
         }
-
-
-
-
     @PutMapping("/approve/{id}")
     public ResponseEntity<?> approve(@PathVariable Long id,
                                      @RequestParam String role,
@@ -115,14 +94,9 @@ public ResponseEntity<?> applyEntry(
                 slip.setStatus("COMPLETED");
                 break;
         }
-
         slipRepo.save(slip);
         return ResponseEntity.ok("Approved by " + role);
     }
-
-
-
-
     @PutMapping("/reject/{id}")
     public ResponseEntity<?> reject(@PathVariable Long id, @RequestParam String role) {
         EntrySlip slip = slipRepo.findById(id).orElseThrow();
@@ -131,19 +105,16 @@ public ResponseEntity<?> applyEntry(
         slipRepo.save(slip);
         return ResponseEntity.ok("Rejected by " + role);
     }
-
     @GetMapping("/user")
     public ResponseEntity<List<EntrySlip>> getUserEntrySlips(Authentication auth) {
         User user = userRepository.findUserByEmail(auth.getName()).orElseThrow();
         List<EntrySlip> slips = slipRepo.findByCreatedBy(user);
         return ResponseEntity.ok(slips);
     }
-
     @GetMapping("approved")
     public ResponseEntity<List<EntrySlip>> getApprovedEntrySlips(Authentication auth) {
 //        User user = userRepository.findUserByEmail(auth.getName()).orElseThrow();
         List<EntrySlip> slips = slipRepo.findByStatus( "COMPLETED");
         return ResponseEntity.ok(slips);
     }
-
 }
