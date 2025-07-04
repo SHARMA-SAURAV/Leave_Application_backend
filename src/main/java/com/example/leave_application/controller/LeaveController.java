@@ -84,28 +84,17 @@ public class LeaveController {
         return ResponseEntity.ok(new GenericMessageDto(returnMessage));
     }
 
-//    @PutMapping("/approve/{id}")
-//    public ResponseEntity<?> approve(@PathVariable Long id, @RequestParam String role) {
-//        LeaveRequest req = leaveRepo.findById(id).orElseThrow();
-//        if (role.equals("FLA")) {
-//            req.setCurrentLevel("SLA");
-//        } else if (role.equals("SLA")) {
-//            req.setCurrentLevel("HR");
-//        } else if (role.equals("HR")) {
-//            req.setStatus("APPROVED");
-//            req.setCurrentLevel("DONE");
-//        }
-//        leaveRepo.save(req);
-//        return ResponseEntity.ok("Approved by " + role);
+    @GetMapping("/user")
+    public ResponseEntity<List<LeaveRequest>> getUserLeaves(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        List<LeaveRequest> leaves = leaveService.getEmployeeLeaveApplications(userDetails.getUser());
+        return ResponseEntity.ok(leaves);
+    }
+
+//    @GetMapping("/approved")
+//    public List<LeaveRequest> getApprovedLeaves() {
+//        return leaveService.getAllApprovedLeaves(); // implement this method
 //    }
-//
-//    @PutMapping("/reject/{id}")
-//    public ResponseEntity<?> reject(@PathVariable Long id, @RequestParam String role) {
-//        LeaveRequest req = leaveRepo.findById(id).orElseThrow();
-//        req.setStatus("REJECTED");
-//        req.setCurrentLevel(role);
-//        leaveRepo.save(req);
-//        return ResponseEntity.ok("Rejected by " + role);
-//    }
+
+
 }
 

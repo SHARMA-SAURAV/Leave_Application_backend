@@ -131,4 +131,19 @@ public ResponseEntity<?> applyEntry(
         slipRepo.save(slip);
         return ResponseEntity.ok("Rejected by " + role);
     }
+
+    @GetMapping("/user")
+    public ResponseEntity<List<EntrySlip>> getUserEntrySlips(Authentication auth) {
+        User user = userRepository.findUserByEmail(auth.getName()).orElseThrow();
+        List<EntrySlip> slips = slipRepo.findByCreatedBy(user);
+        return ResponseEntity.ok(slips);
+    }
+
+    @GetMapping("approved")
+    public ResponseEntity<List<EntrySlip>> getApprovedEntrySlips(Authentication auth) {
+//        User user = userRepository.findUserByEmail(auth.getName()).orElseThrow();
+        List<EntrySlip> slips = slipRepo.findByStatus( "COMPLETED");
+        return ResponseEntity.ok(slips);
+    }
+
 }

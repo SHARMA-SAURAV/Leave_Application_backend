@@ -59,4 +59,3 @@ public class LeaveRequest {
         if(slaApprover == null && flaApprover == null) throw new ValidationException("Must have at least one approver.");
     }
 }
-

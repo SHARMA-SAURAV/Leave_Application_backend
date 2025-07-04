@@ -91,4 +91,10 @@ public class LeaveService {
         leaveRequest.validate();
         leaveRequestRepository.save(leaveRequest);
     }
+
+//    public void getAllApprovedLeaves() {
+//        List<LeaveRequest> approvedLeaves = leaveRequestRepository.findByStatus(LeaveStatus.APPROVED, Sort.by(Sort.Direction.DESC, "appliedAt"));
+//        return leaveRequestRepository.findByStatus(LeaveStatus.APPROVED, Sort.by(Sort.Direction.DESC, "appliedAt"));
+//    }
+
 }

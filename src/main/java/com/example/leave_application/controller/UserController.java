@@ -23,7 +23,8 @@ public class UserController {
 //        System.out.println("Authenticated user: " + auth.getName());
 //        RoleType roleType = RoleType.valueOf(role.toUpperCase());
 //        List<User> users = userRepository.findByRole(roleType);
-//        return ResponseEntity.ok(users);
+//        return ResponseEntity.
+//       ok(users);
 //    }
 
 
