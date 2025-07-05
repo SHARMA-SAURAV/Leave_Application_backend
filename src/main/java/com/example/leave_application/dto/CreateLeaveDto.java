@@ -1,5 +1,6 @@
 package com.example.leave_application.dto;
 
+import com.example.leave_application.model.RoleType;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,10 +20,19 @@ public class CreateLeaveDto {
     @NotBlank
     private String reason;
 
-    private Long flaId;
-    private Long slaId;
+    @NotNull
+    private RoleType approverRole;
 
-    private boolean plLeave = false;
-    private boolean clLeave = false;
-    private boolean rhLeave = false;
+    @AssertTrue(message = "Approver must be either FLA or SLA")
+    private boolean isValidApproverRole() {
+        return approverRole == RoleType.FLA || approverRole == RoleType.SLA;
+    }
+
+    @NotNull
+    private Long approverId;
+
+    private int plLeaves = 0;
+    private int clLeaves = 0;
+    private int rhLeaves = 0;
+    private int otherLeaves = 0;
 }

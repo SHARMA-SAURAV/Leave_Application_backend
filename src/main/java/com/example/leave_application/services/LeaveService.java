@@ -44,7 +44,12 @@ public class LeaveService {
     }
 
     @Transactional
-    public void approveLeaveByFla(Long leaveRequestId, Long sla, Boolean isApproved) {
+    public List<LeaveRequest> getFlaRequests() {
+        return leaveRequestRepository.findByStatusOrderByAppliedAtAsc(LeaveStatus.FLA);
+    }
+
+    @Transactional
+    public void approveLeaveByFla(Long leaveRequestId, Long sla, String substitute, Boolean isApproved) {
         LeaveRequest leaveRequest = getLeaveRequestById(leaveRequestId);
         if(!leaveRequest.getStatus().equals(LeaveStatus.FLA)) {
             throw new ValidationException("This application doesn't need FLA approval.");
@@ -59,6 +64,7 @@ public class LeaveService {
             }
             leaveRequest.setStatus(LeaveStatus.SLA);
             leaveRequest.setSlaApprover(slaSelected);
+            leaveRequest.setSubstitute(substitute);
         }
         else leaveRequest.setStatus(LeaveStatus.REJECTED);
         leaveRequest.setFlaApprovalAt(LocalDateTime.now());
@@ -67,16 +73,37 @@ public class LeaveService {
     }
 
     @Transactional
-    public void approveLeaveBySla(Long leaveRequestId, Boolean isApproved) {
+    public List<LeaveRequest> getSlaRequests() {
+        return leaveRequestRepository.findByStatusOrderByAppliedAtAsc(LeaveStatus.SLA);
+    }
+
+    @Transactional
+    public void approveLeaveBySla(Long leaveRequestId, String substitute, Boolean isApproved) {
         LeaveRequest leaveRequest = getLeaveRequestById(leaveRequestId);
         if(!leaveRequest.getStatus().equals(LeaveStatus.SLA)) {
             throw new ValidationException("This application doesn't need SLA approval.");
         }
-        if(isApproved) leaveRequest.setStatus(LeaveStatus.HR);
+        if(isApproved) {
+            leaveRequest.setStatus(LeaveStatus.HR);
+            if(leaveRequest.getSubstitute() == null) {
+                if(substitute == null) throw new ValidationException("Please specify substitute.");
+                leaveRequest.setSubstitute(substitute);
+            }
+        }
         else leaveRequest.setStatus(LeaveStatus.REJECTED);
         leaveRequest.setSlaApprovalAt(LocalDateTime.now());
         leaveRequest.validate();
         leaveRequestRepository.save(leaveRequest);
+    }
+
+    @Transactional
+    public List<LeaveRequest> getHrRequests() {
+        return leaveRequestRepository.findByStatusOrderByAppliedAtAsc(LeaveStatus.HR);
+    }
+
+    @Transactional
+    public List<LeaveRequest> getApprovedRequests() {
+        return leaveRequestRepository.findByStatusOrderByAppliedAtAsc(LeaveStatus.APPROVED);
     }
 
     @Transactional
