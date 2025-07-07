@@ -5,6 +5,7 @@ import jakarta.validation.ValidationException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
@@ -35,15 +36,16 @@ public class LeaveRequest {
     private LocalDate startDate;
     private LocalDate endDate;
 
-    private boolean rhLeave;
-    private boolean plLeave;
-    private boolean clLeave;
+    private int rhLeaves;
+    private int plLeaves;
+    private int clLeaves;
+    private int otherLeaves;
 
     @Enumerated(EnumType.STRING)
     private LeaveStatus status;
 
-    @Column(length = 100) // Optional field, so nullable = true by default
-    private String substitute; // FLA assigned
+    @Column(length = 100)
+    private String substitute;
 
     private LocalDateTime flaApprovalAt;
     private LocalDateTime slaApprovalAt;
@@ -54,8 +56,8 @@ public class LeaveRequest {
     private LocalDateTime appliedAt;
 
     public void validate() {
-        if(!(plLeave || clLeave || rhLeave)) throw new ValidationException("Must have at least one type of leave selected");
-        if(isClLeave() && isPlLeave()) throw new ValidationException("Cannot have both PL and CL leave at the same time.");
+        if(!(plLeaves > 0 || clLeaves > 0 || rhLeaves > 0)) throw new ValidationException("Must have at least one type of leave selected");
+        if(plLeaves > 0 && clLeaves > 0) throw new ValidationException("Cannot have both PL and CL leave at the same time.");
         if(slaApprover == null && flaApprover == null) throw new ValidationException("Must have at least one approver.");
     }
 }
