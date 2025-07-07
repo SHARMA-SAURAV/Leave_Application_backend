@@ -7,15 +7,16 @@ import com.example.leave_application.repository.UserRepository;
 import com.example.leave_application.services.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
+
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
+
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 import java.util.*;
 
 import java.util.stream.Collectors;
@@ -27,7 +28,12 @@ public class AuthController {
     private AuthService authservice;
     @Autowired
     private UserRepository userRepository;
-
+//    @Autowired
+//    private PasswordResetTokenRepository tokenRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private JavaMailSender mailSender;
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody Map<String , Object> request) {
         // Logic for user registration
@@ -77,4 +83,11 @@ public class AuthController {
 
         return ResponseEntity.ok("User logged out successfully");
     }
+
+
+
+
+
+
+
 }

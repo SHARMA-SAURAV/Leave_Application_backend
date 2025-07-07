@@ -38,6 +38,7 @@ public class LeaveRequest {
 
     private int rhLeaves;
     private int plLeaves;
+//    @Column(name = "cl_leave", nullable = false)
     private int clLeaves;
     private int otherLeaves;
 

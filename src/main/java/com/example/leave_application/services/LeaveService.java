@@ -37,10 +37,18 @@ public class LeaveService {
     }
 
     @Transactional
-    protected LeaveRequest getLeaveRequestById(Long id) {
+    public LeaveRequest getLeaveRequestById(Long id) {
         return leaveRequestRepository.findById(id).orElseThrow(
                 validationError("Leave application not found")
         );
+    }
+
+    public User getHrForLeave(LeaveRequest leaveRequest) {
+        // Find any user with HR role
+        return userRepository.findAll().stream()
+                .filter(u -> u.getRoles().contains(RoleType.HR))
+                .findFirst()
+                .orElse(null);
     }
 
     @Transactional
