@@ -1,10 +1,17 @@
 package com.example.leave_application.controller;
 
+import com.example.leave_application.dto.ForgotPasswordDto;
+import com.example.leave_application.dto.GenericMessageDto;
 import com.example.leave_application.dto.LoginDto;
+import com.example.leave_application.model.ForgotPasswordRequest;
 import com.example.leave_application.model.RoleType;
 import com.example.leave_application.model.User;
+import com.example.leave_application.repository.ForgotPasswordRequestRepository;
 import com.example.leave_application.repository.UserRepository;
 import com.example.leave_application.services.AuthService;
+import com.example.leave_application.services.EmailService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
@@ -21,6 +28,8 @@ import java.util.*;
 
 import java.util.stream.Collectors;
 
+import static com.example.leave_application.exception.CommonExceptions.validationError;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -28,12 +37,13 @@ public class AuthController {
     private AuthService authservice;
     @Autowired
     private UserRepository userRepository;
-//    @Autowired
-//    private PasswordResetTokenRepository tokenRepository;
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private ForgotPasswordRequestRepository forgotPasswordRequestRepository;
     @Autowired
-    private JavaMailSender mailSender;
+    private EmailService emailService;
+    @Autowired
+    private AuthService authService;
+
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody Map<String , Object> request) {
         // Logic for user registration
@@ -85,9 +95,25 @@ public class AuthController {
     }
 
 
+    @GetMapping("/base-url")
+    private String getBaseUrl(HttpServletRequest request) {
+        return request.getScheme() + "://" +
+                request.getServerName() +
+                (request.getServerPort() == 80 || request.getServerPort() == 443 ? "" : ":" + request.getServerPort());
+    }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<GenericMessageDto> forgotPassword(@RequestParam String email) {
+        authService.forgotPassword(email);
+        return ResponseEntity.ok(new GenericMessageDto("Email sent successfully"));
+    }
 
-
-
-
+    @PostMapping("/reset-password")
+    public ResponseEntity<GenericMessageDto> newPassword(@Valid @RequestBody ForgotPasswordDto data) {
+        String newPassword = data.getNewPassword();
+        String token = data.getToken();
+        UUID uuid = UUID.fromString(token);
+        authService.resetPassword(uuid, newPassword);
+        return  ResponseEntity.ok(new GenericMessageDto("Password changed successfully"));
+    }
 }
