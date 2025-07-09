@@ -66,6 +66,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/users").authenticated()
+                        .requestMatchers("/api/auth/forgot-password").permitAll()
+                        .requestMatchers("/api/auth/reset-password").permitAll()
                         .requestMatchers("/api/leave/fla/**").hasRole("FLA")
                         .requestMatchers("/api/leave/sla/**").hasRole("SLA")
                         .requestMatchers("/api/leave/hr/**").hasRole("HR")

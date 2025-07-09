@@ -52,12 +52,6 @@ public class LeaveController {
         System.err.println("rh leaves" + leaveRequest.getRhLeaves());
         System.err.println("other leaves" + leaveRequest.getOtherLeaves());
 
-
-//        if (leaveRequest.getClLeaves() == null) leaveRequest.setClLeaves(0);
-//        if (leaveRequest.getPlLeaves() == null) leaveRequest.setPlLeaves(0);
-//        if (leaveRequest.getRhLeaves() == null) leaveRequest.setRhLeaves(0);
-//        if (leaveRequest.getOtherLeaves() == null) leaveRequest.setOtherLeaves(0);
-
         User approver = userRepository.findById(data.getApproverId()).orElseThrow(validationError("Selected Approver Not Found"));
         if(!approver.getRoles().contains(data.getApproverRole())) {
             throw new ValidationException("Selected Approver is not a " + data.getApproverRole().toString());
