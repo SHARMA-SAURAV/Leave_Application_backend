@@ -71,6 +71,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/leave/fla/**").hasRole("FLA")
                         .requestMatchers("/api/leave/sla/**").hasRole("SLA")
                         .requestMatchers("/api/leave/hr/**").hasRole("HR")
+                        .requestMatchers("/api/movement/fla/**").hasRole("FLA")
+                        .requestMatchers("/api/movement/sla/**").hasRole("SLA")
+                        .requestMatchers("/api/movement/hr/**").hasRole("HR")
 
                         .anyRequest().authenticated() // Secure all other endpoints
                 )
