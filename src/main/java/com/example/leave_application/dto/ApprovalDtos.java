@@ -36,4 +36,30 @@ public class ApprovalDtos {
         @NotNull
         Boolean isApproved;
     }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    static public class FlaPassApprovalDto {
+        @NotNull
+        Long slaSelected;
+        @NotNull
+        Boolean isApproved;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    static public class SlaPassApprovalDto {
+        @NotNull
+        Boolean isApproved;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    static public class HrPassApprovalDto {
+        @NotNull
+        Boolean isApproved;
+    }
 }

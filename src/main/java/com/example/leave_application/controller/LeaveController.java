@@ -78,6 +78,28 @@ public class LeaveController {
         return ResponseEntity.ok(new GenericMessageDto("Leave request submitted."));
     }
 
+    @GetMapping("/fla/upcoming")
+    public List<LeaveRequest> getFlaUpcomingLeaves(
+            @RequestParam(required = false) String searchString,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        System.err.println("Thing: " + (searchString));
+        return leaveService.getUpcomingLeaves(userDetails.getUser().getId(), null, searchString);
+    }
+
+    @GetMapping("/sla/upcoming")
+    public List<LeaveRequest> getSlaUpcomingLeaves(
+            @RequestParam(required = false) String searchString,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return leaveService.getUpcomingLeaves(null, userDetails.getUser().getId(), searchString);
+    }
+
+    @GetMapping("/hr/upcoming")
+    public List<LeaveRequest> getHrUpcomingLeaves(
+            @RequestParam(required = false) String searchString,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return leaveService.getUpcomingLeaves(null, null, searchString);
+    }
+
     @GetMapping("/all")
     public List<LeaveRequest> allRequests(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return leaveService.getEmployeeLeaveApplications(userDetails.getUser());
