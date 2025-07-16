@@ -1,11 +1,14 @@
 package com.example.leave_application.dto;
 
+import com.example.leave_application.model.LeaveType;
 import com.example.leave_application.model.RoleType;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -31,8 +34,9 @@ public class CreateLeaveDto {
     @NotNull
     private Long approverId;
 
-    private int plLeaves = 0;
-    private int clLeaves = 0;
-    private int rhLeaves = 0;
-    private int otherLeaves = 0;
+    @NotEmpty
+    private Set<LeaveType> leaveTypes;
+    @NotNull
+    @Positive
+    private int leaveCount;
 }

@@ -1,10 +1,7 @@
 package com.example.leave_application.dto;
 
 import com.example.leave_application.model.RoleType;
-import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,7 +12,7 @@ import java.time.LocalTime;
 @NoArgsConstructor
 public class CreateMovementPassDto {
     @NotNull
-    @FutureOrPresent
+    @PastOrPresent
     private LocalDate date;
 
     @NotNull

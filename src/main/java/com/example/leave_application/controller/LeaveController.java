@@ -42,15 +42,8 @@ public class LeaveController {
         leaveRequest.setReason(data.getReason());
         leaveRequest.setStartDate(data.getStartDate());
         leaveRequest.setEndDate(data.getEndDate());
-        leaveRequest.setPlLeaves(data.getPlLeaves());
-        leaveRequest.setClLeaves(data.getClLeaves());
-        leaveRequest.setRhLeaves(data.getRhLeaves());
-        leaveRequest.setOtherLeaves(data.getOtherLeaves());
-        System.err.println("Leave Request: " + leaveRequest);
-        System.err.println("Pl leaves" + leaveRequest.getPlLeaves());
-        System.err.println("cl leaves" + leaveRequest.getClLeaves());
-        System.err.println("rh leaves" + leaveRequest.getRhLeaves());
-        System.err.println("other leaves" + leaveRequest.getOtherLeaves());
+        leaveRequest.setLeaveCount(data.getLeaveCount());
+        leaveRequest.setLeaveTypes(data.getLeaveTypes());
 
         User approver = userRepository.findById(data.getApproverId()).orElseThrow(validationError("Selected Approver Not Found"));
         if(!approver.getRoles().contains(data.getApproverRole())) {

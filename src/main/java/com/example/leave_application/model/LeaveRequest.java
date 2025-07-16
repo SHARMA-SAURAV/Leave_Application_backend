@@ -10,6 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -36,11 +37,10 @@ public class LeaveRequest {
     private LocalDate startDate;
     private LocalDate endDate;
 
-    private int rhLeaves;
-    private int plLeaves;
-//    @Column(name = "cl_leave", nullable = false)
-    private int clLeaves;
-    private int otherLeaves;
+    @ElementCollection(fetch = FetchType.EAGER)
+    private Set<LeaveType> leaveTypes;
+
+    private int leaveCount;
 
     @Enumerated(EnumType.STRING)
     private LeaveStatus status;
@@ -57,8 +57,8 @@ public class LeaveRequest {
     private LocalDateTime appliedAt;
 
     public void validate() {
-        if(!(plLeaves > 0 || clLeaves > 0 || rhLeaves > 0)) throw new ValidationException("Must have at least one type of leave selected");
-        if(plLeaves > 0 && clLeaves > 0) throw new ValidationException("Cannot have both PL and CL leave at the same time.");
+        if(leaveTypes.isEmpty()) throw new ValidationException("Must select at least one leave type");
+        if(leaveTypes.contains(LeaveType.CL) && leaveTypes.contains(LeaveType.PL)) throw new ValidationException("Cannot have both PL and CL leaves at once.");
         if(slaApprover == null && flaApprover == null) throw new ValidationException("Must have at least one approver.");
     }
 }
