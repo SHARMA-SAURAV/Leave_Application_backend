@@ -12,9 +12,7 @@ public class ApprovalDtos {
     @AllArgsConstructor
     @NoArgsConstructor
     static public class FlaApprovalDto {
-        @NotNull
         Long slaSelected;
-        @NotBlank
         String substituteSelected;
         @NotNull
         Boolean isApproved;
@@ -41,9 +39,7 @@ public class ApprovalDtos {
     @AllArgsConstructor
     @NoArgsConstructor
     static public class FlaPassApprovalDto {
-        @NotNull
         Long slaSelected;
-        @NotNull
         Boolean isApproved;
     }
 
