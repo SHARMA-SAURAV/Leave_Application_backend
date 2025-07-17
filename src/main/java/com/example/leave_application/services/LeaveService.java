@@ -1,6 +1,8 @@
 package com.example.leave_application.services;
 
 
+import com.example.leave_application.dto.CommonEmailTemplates;
+import com.example.leave_application.dto.EmailTemplate;
 import com.example.leave_application.model.LeaveRequest;
 import com.example.leave_application.model.LeaveStatus;
 import com.example.leave_application.model.RoleType;
@@ -26,11 +28,13 @@ public class LeaveService {
     LeaveRequestRepository leaveRequestRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private EmailService emailService;
 
     @Transactional
     public void generateLeaveApplication(LeaveRequest data) {
-        leaveRequestRepository.save(data);
         data.validate();
+        leaveRequestRepository.save(data);
     }
 
     @Transactional
@@ -81,10 +85,19 @@ public class LeaveService {
             leaveRequest.setStatus(LeaveStatus.SLA);
             leaveRequest.setSlaApprover(slaSelected);
             leaveRequest.setSubstitute(substitute);
-        } else leaveRequest.setStatus(LeaveStatus.REJECTED);
+        } else {
+            leaveRequest.setStatus(LeaveStatus.REJECTED);
+        }
         leaveRequest.setFlaApprovalAt(LocalDateTime.now());
         leaveRequest.validate();
         leaveRequestRepository.save(leaveRequest);
+        if(!isApproved) {
+            EmailTemplate template = new CommonEmailTemplates.ApprovedEmailTemplate("Leave Application", "rejected");
+            emailService.sendTemplate(leaveRequest.getRequestedBy().getEmail(), template);
+        } else {
+            EmailTemplate template = new CommonEmailTemplates.LeaveRequestApprovalTemplate(leaveRequest);
+            emailService.sendTemplate(leaveRequest.getSlaApprover().getEmail(), template);
+        }
     }
 
     @Transactional
@@ -104,10 +117,20 @@ public class LeaveService {
                 if (substitute == null) throw new ValidationException("Please specify substitute.");
                 leaveRequest.setSubstitute(substitute);
             }
-        } else leaveRequest.setStatus(LeaveStatus.REJECTED);
+        } else {
+            leaveRequest.setStatus(LeaveStatus.REJECTED);
+        }
         leaveRequest.setSlaApprovalAt(LocalDateTime.now());
         leaveRequest.validate();
         leaveRequestRepository.save(leaveRequest);
+        if(!isApproved) {
+            EmailTemplate template = new CommonEmailTemplates.ApprovedEmailTemplate("Leave Application", "rejected");
+            emailService.sendTemplate(leaveRequest.getRequestedBy().getEmail(), template);
+        } else {
+            User hr = getHrForLeave(leaveRequest);
+            EmailTemplate template = new CommonEmailTemplates.LeaveRequestApprovalTemplate(leaveRequest);
+            emailService.sendTemplate(hr.getEmail(), template);
+        }
     }
 
     @Transactional
@@ -126,11 +149,19 @@ public class LeaveService {
         if (!leaveRequest.getStatus().equals(LeaveStatus.HR)) {
             throw new ValidationException("This application doesn't need HR approval.");
         }
-        if (isApproved) leaveRequest.setStatus(LeaveStatus.APPROVED);
-        else leaveRequest.setStatus(LeaveStatus.REJECTED);
+        String action;
+        if (isApproved) {
+            leaveRequest.setStatus(LeaveStatus.APPROVED);
+            action = "Approved";
+        }   else {
+            leaveRequest.setStatus(LeaveStatus.REJECTED);
+            action = "Rejected";
+        }
         leaveRequest.setHrApprovalAt(LocalDateTime.now());
         leaveRequest.validate();
         leaveRequestRepository.save(leaveRequest);
+        EmailTemplate template = new CommonEmailTemplates.ApprovedEmailTemplate("Leave Application", action);
+        emailService.sendTemplate(leaveRequest.getRequestedBy().getEmail(), template);
     }
 
 //    public void getAllApprovedLeaves() {

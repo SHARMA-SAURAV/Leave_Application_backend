@@ -1,4 +1,5 @@
 package com.example.leave_application.controller;
+import com.example.leave_application.dto.CommonEmailTemplates;
 import com.example.leave_application.model.EntrySlip;
 import com.example.leave_application.model.User;
 import com.example.leave_application.repository.EntrySlipRepository;
@@ -51,33 +52,10 @@ public class EntrySlipController {
 //    }
 
 
-    public  void forwardToNext(String role, EntrySlip slip, User user){
-//        User user =indent.getRequestedBy();
-        System.err.println("USER  --"+user);
-        if(user!= null && user.getEmail()!= null){
-            String userEmail = slip.getApproverEmail();
-            String Username= user.getName();
-            String emailBody = "Hello " +Username + ",\n\n" +
-                    "The Entry Slip has been requested for your approval " + role+"\n"+
-
-                    "Employee Name: " + user.getName() + "\n" +
-                    "Email: " + user.getEmail() + "\n" +
-                    "Department: " + user.getDepartment()+ "\n" +
-                    "Employee ID: " + user.getEmployeeId() + "\n" +
-
-                    "Date: " + slip.getDate() + "\n" +
-                    "In Time: " + slip.getInTime() + "\n" +
-                    "Out Time: " + slip.getOutTime() + "\n" +
-                    "Reason: " + slip.getReason() + "\n\n" +
-                    "Best regards,\n" +
-                    "Your Leave Management System";
-            System.err.println(emailBody);
-            System.err.println("email of rejected mail"+userEmail);
-            emailService.sendEmail(userEmail, "Request for Approval ", emailBody);
-        }
+    public void forwardToNext(String role, EntrySlip slip, User user){
+        CommonEmailTemplates.EntrySlipApprovalTemplate template = new CommonEmailTemplates.EntrySlipApprovalTemplate(slip);
+        emailService.sendTemplate(slip.getApproverEmail(), template);
     }
-
-
 
 @PostMapping("/apply")
 public ResponseEntity<?> applyEntry(

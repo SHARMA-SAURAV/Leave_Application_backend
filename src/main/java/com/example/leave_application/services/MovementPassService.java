@@ -1,6 +1,8 @@
 package com.example.leave_application.services;
 
 
+import com.example.leave_application.dto.CommonEmailTemplates;
+import com.example.leave_application.dto.EmailTemplate;
 import com.example.leave_application.model.*;
 import com.example.leave_application.repository.MovementPassRepository;
 import com.example.leave_application.repository.MovementPassRepository;
@@ -24,6 +26,8 @@ public class MovementPassService {
     MovementPassRepository movementPassRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private EmailService emailService;
 
     @Transactional
     public void generateMovementPass(MovementPass data) {
@@ -51,12 +55,6 @@ public class MovementPassService {
                 .orElse(null);
     }
 
-//    @Transactional
-//    public List<MovementPass> getUpcomingLeaves(Long flaId, Long slaId, String searchString) {
-//        if(searchString == null) searchString = "";
-//        return movementPassRepository.findUpcomingLeaves(flaId, slaId, searchString, LocalDate.now(), LeaveStatus.APPROVED);
-//    }
-
     @Transactional
     public List<MovementPass> getFlaRequests() {
         return movementPassRepository.findByStatusOrderByAppliedAtDesc(MovementPassStatus.FLA);
@@ -82,6 +80,13 @@ public class MovementPassService {
         movementPass.setFlaApprovalAt(LocalDateTime.now());
         movementPass.validate();
         movementPassRepository.save(movementPass);
+        if(!isApproved) {
+            CommonEmailTemplates.ApprovedEmailTemplate template = new CommonEmailTemplates.ApprovedEmailTemplate("Movement Pass", "rejected");
+            emailService.sendTemplate(movementPass.getRequestedBy().getEmail(), template);
+        } else {
+            EmailTemplate template = new CommonEmailTemplates.MovementPassApprovalTemplate(movementPass);
+            emailService.sendTemplate(movementPass.getSlaApprover().getEmail(), template);
+        }
     }
 
     @Transactional
@@ -101,6 +106,14 @@ public class MovementPassService {
         movementPass.setSlaApprovalAt(LocalDateTime.now());
         movementPass.validate();
         movementPassRepository.save(movementPass);
+        if(!isApproved) {
+            EmailTemplate template = new CommonEmailTemplates.ApprovedEmailTemplate("Movement Pass", "rejected");
+            emailService.sendTemplate(movementPass.getRequestedBy().getEmail(), template);
+        } else {
+            User hr = getHrForPass(movementPass);
+            EmailTemplate template = new CommonEmailTemplates.MovementPassApprovalTemplate(movementPass);
+            emailService.sendTemplate(hr.getEmail(), template);
+        }
     }
 
     @Transactional
@@ -124,5 +137,8 @@ public class MovementPassService {
         movementPass.setHrApprovalAt(LocalDateTime.now());
         movementPass.validate();
         movementPassRepository.save(movementPass);
+        String action = isApproved ? "Approved" : "Rejected";
+        CommonEmailTemplates.ApprovedEmailTemplate template = new CommonEmailTemplates.ApprovedEmailTemplate("Movement Pass", action);
+        emailService.sendTemplate(movementPass.getRequestedBy().getEmail(), template);
     }
 }

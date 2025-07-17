@@ -1,5 +1,6 @@
 package com.example.leave_application.services;
 
+import com.example.leave_application.dto.EmailTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -16,6 +17,14 @@ public class EmailService {
         mailMessage.setTo(to);
         mailMessage.setSubject(subject);
         mailMessage.setText(message);
+        mailSender.send(mailMessage);
+    }
+
+    public void sendTemplate(String to, EmailTemplate template) {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(to);
+        mailMessage.setSubject(template.getSubject());
+        mailMessage.setText(template.getBody());
         mailSender.send(mailMessage);
     }
 }
