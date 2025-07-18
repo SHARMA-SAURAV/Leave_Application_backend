@@ -1,6 +1,7 @@
 package com.example.leave_application.controller;
 
 import com.example.leave_application.dto.ApprovalDtos;
+import com.example.leave_application.dto.CommonEmailTemplates;
 import com.example.leave_application.dto.CreateLeaveDto;
 import com.example.leave_application.dto.GenericMessageDto;
 import com.example.leave_application.model.LeaveRequest;
@@ -62,11 +63,8 @@ public class LeaveController {
         leaveService.generateLeaveApplication(leaveRequest);
         // Send email to selected approver (FLA or SLA)
         if (approver.getEmail() != null) {
-            emailService.sendEmail(
-                approver.getEmail(),
-                "Leave Application Approval Needed",
-                "Dear " + approver.getName() + ",\n\nA leave application is pending your approval.\n\nRegards,\nLeave Management System"
-            );
+            CommonEmailTemplates.LeaveRequestApprovalTemplate template = new CommonEmailTemplates.LeaveRequestApprovalTemplate(leaveRequest);
+            emailService.sendTemplate(approver.getEmail(), template);
         }
         return ResponseEntity.ok(new GenericMessageDto("Leave request submitted."));
     }
@@ -122,29 +120,8 @@ public class LeaveController {
         leaveService.approveLeaveBySla(id, data.getSubstituteSelected(), data.getIsApproved());
         LeaveRequest leaveRequest = leaveService.getLeaveRequestById(id); // You may need to implement this method
         String returnMessage;
-        if(data.getIsApproved()) {
-            // Notify HR for next approval
-            User hr = leaveService.getHrForLeave(leaveRequest); // You may need to implement this method
-            if(hr != null && hr.getEmail() != null) {
-                emailService.sendEmail(
-                    hr.getEmail(),
-                    "Leave Application Approval Needed",
-                    "Dear " + hr.getName() + ",\n\nA leave application is pending your approval.\n\nRegards,\nLeave Management System"
-                );
-            }
-            returnMessage = "Leave application approved and sent to HR";
-        } else {
-            // Notify applicant of rejection
-            User applicant = leaveRequest.getRequestedBy();
-            if(applicant != null && applicant.getEmail() != null) {
-                emailService.sendEmail(
-                    applicant.getEmail(),
-                    "Your Leave Application is Rejected",
-                    "Dear " + applicant.getName() + ",\n\nYour leave application has been rejected.\n\nRegards,\nLeave Management System"
-                );
-            }
-            returnMessage = "Leave application rejected";
-        }
+        if(data.getIsApproved()) returnMessage = "Leave application approved and sent to HR";
+        else returnMessage = "Leave application rejected";
         return ResponseEntity.ok(new GenericMessageDto(returnMessage));
     }
 
@@ -163,29 +140,8 @@ public class LeaveController {
         leaveService.approveLeaveByHr(id, data.getIsApproved());
         LeaveRequest leaveRequest = leaveService.getLeaveRequestById(id); // You may need to implement this method
         String returnMessage;
-        if(data.getIsApproved()) {
-            // Notify applicant of approval
-            User applicant = leaveRequest.getRequestedBy();
-            if(applicant != null && applicant.getEmail() != null) {
-                emailService.sendEmail(
-                    applicant.getEmail(),
-                    "Your Leave Application is Approved",
-                    "Dear " + applicant.getName() + ",\n\nYour leave application has been approved.\n\nRegards,\nLeave Management System"
-                );
-            }
-            returnMessage = "Leave application approved";
-        } else {
-            // Notify applicant of rejection
-            User applicant = leaveRequest.getRequestedBy();
-            if(applicant != null && applicant.getEmail() != null) {
-                emailService.sendEmail(
-                    applicant.getEmail(),
-                    "Your Leave Application is Rejected",
-                    "Dear " + applicant.getName() + ",\n\nYour leave application has been rejected.\n\nRegards,\nLeave Management System"
-                );
-            }
-            returnMessage = "Leave application rejected";
-        }
+        if(data.getIsApproved()) returnMessage = "Leave application approved";
+        else returnMessage = "Leave application rejected";
         return ResponseEntity.ok(new GenericMessageDto(returnMessage));
     }
 

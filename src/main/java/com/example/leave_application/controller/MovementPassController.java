@@ -1,9 +1,6 @@
 package com.example.leave_application.controller;
 
-import com.example.leave_application.dto.ApprovalDtos;
-import com.example.leave_application.dto.CreateLeaveDto;
-import com.example.leave_application.dto.CreateMovementPassDto;
-import com.example.leave_application.dto.GenericMessageDto;
+import com.example.leave_application.dto.*;
 import com.example.leave_application.model.*;
 import com.example.leave_application.repository.UserRepository;
 import com.example.leave_application.security.UserDetailsImpl;
@@ -60,36 +57,11 @@ public class MovementPassController {
         movementPassService.generateMovementPass(pass);
         // Send email to selected approver (FLA or SLA)
         if (approver.getEmail() != null) {
-            emailService.sendEmail(
-                    approver.getEmail(),
-                    "Movement Pass Approval Needed",
-                    "Dear " + approver.getName() + ",\n\nA movement pass is pending your approval.\n\nRegards,\nLeave Management System"
-            );
+            CommonEmailTemplates.MovementPassApprovalTemplate template = new CommonEmailTemplates.MovementPassApprovalTemplate(pass);
+            emailService.sendTemplate(approver.getEmail(), template);
         }
         return ResponseEntity.ok(new GenericMessageDto("Movement pass submitted."));
     }
-
-//    @GetMapping("/fla/upcoming")
-//    public List<MovementPass> getFlaUpcomingLeaves(
-//            @RequestParam(required = false) String searchString,
-//            @AuthenticationPrincipal UserDetailsImpl userDetails) {
-//        System.err.println("Thing: " + (searchString));
-//        return movementPassService.getUpcomingLeaves(userDetails.getUser().getId(), null, searchString);
-//    }
-//
-//    @GetMapping("/sla/upcoming")
-//    public List<MovementPass> getSlaUpcomingLeaves(
-//            @RequestParam(required = false) String searchString,
-//            @AuthenticationPrincipal UserDetailsImpl userDetails) {
-//        return movementPassService.getUpcomingLeaves(null, userDetails.getUser().getId(), searchString);
-//    }
-//
-//    @GetMapping("/hr/upcoming")
-//    public List<MovementPass> getHrUpcomingLeaves(
-//            @RequestParam(required = false) String searchString,
-//            @AuthenticationPrincipal UserDetailsImpl userDetails) {
-//        return movementPassService.getUpcomingLeaves(null, null, searchString);
-//    }
 
     @GetMapping("/all")
     public List<MovementPass> allRequests(@AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -104,9 +76,7 @@ public class MovementPassController {
     @PatchMapping("/fla/approve/{id}")
     public ResponseEntity<GenericMessageDto> approveFla(@PathVariable Long id, @Valid @RequestBody ApprovalDtos.FlaPassApprovalDto data, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         movementPassService.approvePassByFla(id, data.getSlaSelected(), data.getIsApproved());
-        String returnMessage;
-        if(data.getIsApproved()) returnMessage = "Movement pass approved and sent to SLA";
-        else returnMessage = "Movement pass application rejected";
+        String returnMessage = data.getIsApproved() ? "Movement Pass approved and sent to SLA" :  "Movement Pass application rejected";
         return ResponseEntity.ok(new GenericMessageDto(returnMessage));
     }
 
@@ -118,31 +88,7 @@ public class MovementPassController {
     @PatchMapping("/sla/approve/{id}")
     public ResponseEntity<GenericMessageDto> approveSla(@PathVariable Long id, @Valid @RequestBody ApprovalDtos.SlaPassApprovalDto data, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         movementPassService.approvePassBySla(id, data.getIsApproved());
-        MovementPass movementPass = movementPassService.getMovementPassById(id); // You may need to implement this method
-        String returnMessage;
-        if(data.getIsApproved()) {
-            // Notify HR for next approval
-            User hr = movementPassService.getHrForPass(movementPass); // You may need to implement this method
-            if(hr != null && hr.getEmail() != null) {
-                emailService.sendEmail(
-                        hr.getEmail(),
-                        "Movement Pass Approval Needed",
-                        "Dear " + hr.getName() + ",\n\nA movement pass is pending your approval.\n\nRegards,\nLeave Management System"
-                );
-            }
-            returnMessage = "Movement Pass approved and sent to HR";
-        } else {
-            // Notify applicant of rejection
-            User applicant = movementPass.getRequestedBy();
-            if(applicant != null && applicant.getEmail() != null) {
-                emailService.sendEmail(
-                        applicant.getEmail(),
-                        "Your Movement Pass is Rejected",
-                        "Dear " + applicant.getName() + ",\n\nYour Movement Pass has been rejected.\n\nRegards,\nLeave Management System"
-                );
-            }
-            returnMessage = "Movement Pass rejected";
-        }
+        String returnMessage = data.getIsApproved() ? "Movement Pass approved and sent to HR" :  "Movement Pass application rejected";
         return ResponseEntity.ok(new GenericMessageDto(returnMessage));
     }
 
@@ -159,31 +105,7 @@ public class MovementPassController {
     @PatchMapping("/hr/approve/{id}")
     public ResponseEntity<GenericMessageDto> approveHr(@PathVariable Long id, @Valid @RequestBody ApprovalDtos.HrPassApprovalDto data, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         movementPassService.approvePassByHr(id, data.getIsApproved());
-        MovementPass movementPass = movementPassService.getMovementPassById(id); // You may need to implement this method
-        String returnMessage;
-        if(data.getIsApproved()) {
-            // Notify applicant of approval
-            User applicant = movementPass.getRequestedBy();
-            if(applicant != null && applicant.getEmail() != null) {
-                emailService.sendEmail(
-                        applicant.getEmail(),
-                        "Your Movement Pass is Approved",
-                        "Dear " + applicant.getName() + ",\n\nYour Movement Pass has been approved.\n\nRegards,\nLeave Management System"
-                );
-            }
-            returnMessage = "Movement Pass approved";
-        } else {
-            // Notify applicant of rejection
-            User applicant = movementPass.getRequestedBy();
-            if(applicant != null && applicant.getEmail() != null) {
-                emailService.sendEmail(
-                        applicant.getEmail(),
-                        "Your Movement Pass is Rejected",
-                        "Dear " + applicant.getName() + ",\n\nYour Movement Pass has been rejected.\n\nRegards,\nLeave Management System"
-                );
-            }
-            returnMessage = "Movement Pass rejected";
-        }
+        String returnMessage = data.getIsApproved() ? "Movement Pass approved!" :  "Movement Pass application rejected!";
         return ResponseEntity.ok(new GenericMessageDto(returnMessage));
     }
 
@@ -192,11 +114,4 @@ public class MovementPassController {
         List<MovementPass> passes = movementPassService.getEmployeeMovementPasses(userDetails.getUser());
         return ResponseEntity.ok(passes);
     }
-
-//    @GetMapping("/approved")
-//    public List<MovementPass> getApprovedLeaves() {
-//        return movementPassService.getAllApprovedLeaves(); // implement this method
-//    }
-
-
 }

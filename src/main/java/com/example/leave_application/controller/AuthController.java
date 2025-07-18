@@ -38,10 +38,6 @@ public class AuthController {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private ForgotPasswordRequestRepository forgotPasswordRequestRepository;
-    @Autowired
-    private EmailService emailService;
-    @Autowired
     private AuthService authService;
 
     @PostMapping("/register")

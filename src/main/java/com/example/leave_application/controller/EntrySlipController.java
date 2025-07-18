@@ -1,4 +1,5 @@
 package com.example.leave_application.controller;
+import com.example.leave_application.dto.CommonEmailTemplates;
 import com.example.leave_application.model.EntrySlip;
 import com.example.leave_application.model.User;
 import com.example.leave_application.repository.EntrySlipRepository;
@@ -51,33 +52,10 @@ public class EntrySlipController {
 //    }
 
 
-    public  void forwardToNext(String role, EntrySlip slip, User user){
-//        User user =indent.getRequestedBy();
-        System.err.println("USER  --"+user);
-        if(user!= null && user.getEmail()!= null){
-            String userEmail = slip.getApproverEmail();
-            String Username= user.getName();
-            String emailBody = "Hello " +Username + ",\n\n" +
-                    "The Entry Slip has been requested for your approval " + role+"\n"+
-
-                    "Employee Name: " + user.getName() + "\n" +
-                    "Email: " + user.getEmail() + "\n" +
-                    "Department: " + user.getDepartment()+ "\n" +
-                    "Employee ID: " + user.getEmployeeId() + "\n" +
-
-                    "Date: " + slip.getDate() + "\n" +
-                    "In Time: " + slip.getInTime() + "\n" +
-                    "Out Time: " + slip.getOutTime() + "\n" +
-                    "Reason: " + slip.getReason() + "\n\n" +
-                    "Best regards,\n" +
-                    "Your Leave Management System";
-            System.err.println(emailBody);
-            System.err.println("email of rejected mail"+userEmail);
-            emailService.sendEmail(userEmail, "Request for Approval ", emailBody);
-        }
+    public void forwardToNext(String role, EntrySlip slip, User user){
+        CommonEmailTemplates.EntrySlipApprovalTemplate template = new CommonEmailTemplates.EntrySlipApprovalTemplate(slip);
+        emailService.sendTemplate(slip.getApproverEmail(), template);
     }
-
-
 
 @PostMapping("/apply")
 public ResponseEntity<?> applyEntry(
@@ -141,15 +119,10 @@ public ResponseEntity<?> applyEntry(
                 // Assign selected SLA as next approver
                 if (nextApproverEmail != null) {
                     slip.setApproverEmail(nextApproverEmail);
-                    // Send email to SLA for approval
-                    User slaUser = userRepository.findUserByEmail(nextApproverEmail).orElse(null);
-                    if (slaUser != null) {
-                        emailService.sendEmail(
+                    userRepository.findUserByEmail(nextApproverEmail).ifPresent(slaUser -> emailService.sendTemplate(
                             slaUser.getEmail(),
-                            "Entry Slip Approval Needed",
-                            "Dear " + slaUser.getName() + ",\n\nYou have a new entry slip pending your approval. Please review it.\n\nRegards,\nLeave Management System"
-                        );
-                    }
+                            new CommonEmailTemplates.EntrySlipApprovalTemplate(slip)
+                    ));
                 }
                 break;
 
@@ -161,14 +134,10 @@ public ResponseEntity<?> applyEntry(
                 if (nextApproverEmail != null) {
                     slip.setApproverEmail(nextApproverEmail);
                     // Send email to HR for approval
-                    User hrUser = userRepository.findUserByEmail(nextApproverEmail).orElse(null);
-                    if (hrUser != null) {
-                        emailService.sendEmail(
+                    userRepository.findUserByEmail(nextApproverEmail).ifPresent(hrUser -> emailService.sendTemplate(
                             hrUser.getEmail(),
-                            "Entry Slip Approval Needed",
-                            "Dear " + hrUser.getName() + ",\n\nYou have a new entry slip pending your approval. Please review it.\n\nRegards,\nLeave Management System"
-                        );
-                    }
+                            new CommonEmailTemplates.EntrySlipApprovalTemplate(slip)
+                    ));
                 }
                 break;
 
@@ -179,10 +148,9 @@ public ResponseEntity<?> applyEntry(
                 // Notify the user who created the application
                 User applicant = slip.getCreatedBy();
                 if (applicant != null && applicant.getEmail() != null) {
-                    emailService.sendEmail(
-                        applicant.getEmail(),
-                        "Your Entry Slip is Approved",
-                        "Dear " + applicant.getName() + ",\n\nYour entry slip application has been approved.\n\nRegards,\nLeave Management System"
+                    emailService.sendTemplate(
+                            applicant.getEmail(),
+                            new CommonEmailTemplates.ApprovedEmailTemplate("Entry Slip", "approved")
                     );
                 }
                 break;
@@ -199,10 +167,9 @@ public ResponseEntity<?> applyEntry(
         // Notify the user who created the application
         User applicant = slip.getCreatedBy();
         if (applicant != null && applicant.getEmail() != null) {
-            emailService.sendEmail(
-                applicant.getEmail(),
-                "Your Entry Slip is Rejected",
-                "Dear " + applicant.getName() + ",\n\nYour entry slip application has been rejected.\n\nRegards,\nLeave Management System"
+            emailService.sendTemplate(
+                    applicant.getEmail(),
+                    new CommonEmailTemplates.ApprovedEmailTemplate("Entry Slip", "rejected")
             );
         }
         return ResponseEntity.ok("Rejected by " + role);
